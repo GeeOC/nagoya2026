@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="名古屋之旅"/>
+<title>名古屋之旅 2026</title>
+<style>
+:root{
+  --sakura:#f9b4c0;--sakura-l:#fff0f3;--rose:#d44f6a;
+  --amber:#f5a623;--green:#4aad8a;--blue:#3a7ec2;--purple:#8a6fd4;
+  --ink:#22201e;--muted:#756e68;--line:#ede4df;
+  --bg:#fdf8f6;--card:#ffffff;
+  --shadow:0 4px 20px rgba(80,30,40,.09);
+  --r:16px;--nav-h:62px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;color:var(--ink);line-height:1.55;overscroll-behavior:none;}
+button{cursor:pointer;font-family:inherit;}
+a{color:inherit;text-decoration:none;}
+
+/* LAYOUT */
+#app{display:flex;flex-direction:column;height:100dvh;max-width:600px;margin:0 auto;position:relative;}
+#top-bar{flex:0 0 auto;background:linear-gradient(160deg,#fff5f0,#fff0f5);border-bottom:1px solid var(--line);padding:14px 16px 0;}
+#top-bar h1{font-size:21px;letter-spacing:-.3px;margin-bottom:3px;}
+.info-row{display:flex;gap:7px;flex-wrap:wrap;padding:6px 0 0;}
+.info-pill{background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:11.5px;color:var(--muted);}
+.info-pill b{color:var(--rose);}
+#day-bar{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 11px;background:linear-gradient(160deg,#fff5f0,#fff0f5);scrollbar-width:none;}
+#day-bar::-webkit-scrollbar{display:none;}
+.day-tab{flex:0 0 auto;padding:7px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:700;color:var(--muted);transition:all .2s;line-height:1.3;text-align:center;}
+.day-tab.active{background:var(--rose);border-color:var(--rose);color:#fff;}
+#content{flex:1 1 0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 8px);}
+.screen{display:none;padding:12px 13px 4px;}
+.screen.visible{display:block;}
+
+/* NOTICE / SECTION */
+.notice{background:linear-gradient(135deg,#fff8e1,#fff3e6);border:1px solid #f5d49a;border-radius:12px;padding:10px 13px;font-size:13px;margin-bottom:11px;color:#5a3e00;}
+.notice b{color:#c06000;}
+.notice.blue{background:linear-gradient(135deg,#eef4ff,#e8f0ff);border-color:#b8cfff;color:#1a3068;}
+.notice.blue b{color:#1a3068;}
+.notice.green{background:linear-gradient(135deg,#edfaf3,#e4f7ec);border-color:#a0d9bc;color:#0d5030;}
+.notice.green b{color:#0d5030;}
+.notice.warn{background:linear-gradient(135deg,#fff0f0,#ffe8e8);border-color:#f9bfbf;color:#7a1820;}
+.notice.warn b{color:#9a0010;}
+.sec-title{font-size:11.5px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;margin:14px 3px 7px;}
+
+/* TIMELINE */
+.tl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:9px;overflow:hidden;}
+.tl-head{display:grid;grid-template-columns:72px 1fr 30px;align-items:stretch;}
+.tl-time{background:var(--sakura-l);border-right:2px solid var(--sakura);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:var(--rose);padding:12px 5px;text-align:center;line-height:1.3;}
+.tl-body{padding:11px 10px 10px;}
+.tl-body b{display:block;font-size:14px;margin-bottom:3px;line-height:1.35;}
+.tl-body p{font-size:12.5px;color:var(--muted);line-height:1.4;}
+.tl-toggle{display:flex;align-items:center;justify-content:center;padding-right:6px;color:#ddd;font-size:18px;transition:transform .2s;}
+.tl-card.has-detail .tl-toggle{color:var(--rose);}
+.tl-card.open .tl-toggle{transform:rotate(90deg);}
+.tl-detail{display:none;border-top:1px solid var(--line);background:#fdfaf9;padding:10px 13px 12px;}
+.tl-card.open .tl-detail{display:block;}
+.tl-detail ul{padding-left:17px;margin:4px 0 0;}
+.tl-detail li{font-size:12.5px;color:var(--muted);margin:5px 0;line-height:1.4;}
+.tl-detail li b{color:var(--ink);font-size:12.5px;}
+.map-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:6px 13px;background:var(--blue);color:#fff;border-radius:999px;font-size:12px;font-weight:600;border:none;box-shadow:0 2px 8px rgba(40,80,160,.2);}
+.map-btn span{font-size:14px;}
+.badge-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.b-food{background:#fff0e6;color:#b04000;}
+.b-sakura{background:#fff0f4;color:#b03060;}
+.b-car{background:#eef4ff;color:#1a55b0;}
+.b-free{background:#f0faf4;color:#1a7a50;}
+.b-warn{background:#fff8e6;color:#905000;}
+.b-alt{background:#f5f0ff;color:#5030a0;}
+.b-shop{background:#fff5e0;color:#804000;}
+.b-hotel{background:#e8f4ff;color:#104080;}
+
+/* HOTEL CARD */
+.hotel-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden;}
+.hotel-head{display:flex;align-items:center;gap:11px;padding:12px 13px;}
+.hotel-icon{width:44px;height:44px;border-radius:12px;background:#eef4ff;display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 44px;}
+.hotel-info h3{font-size:14.5px;margin-bottom:2px;}
+.hotel-info p{font-size:12px;color:var(--muted);}
+.hotel-addr{padding:0 13px 12px;font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* RESTAURANT */
+.rest-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:11px;overflow:hidden;}
+.rest-head{display:flex;align-items:center;gap:12px;padding:12px 13px 9px;}
+.rest-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px;flex:0 0 46px;}
+.rest-info h3{font-size:14.5px;margin-bottom:2px;}
+.rest-info p{font-size:12px;color:var(--muted);}
+.rest-tags{display:flex;flex-wrap:wrap;gap:5px;padding:0 13px 9px;}
+.rest-tag{background:var(--sakura-l);border:1px solid var(--sakura);color:var(--rose);padding:3px 10px;border-radius:999px;font-size:11.5px;}
+.rest-note{border-top:1px solid var(--line);background:#fdfaf9;padding:9px 13px;font-size:12.5px;color:var(--muted);}
+
+/* CHECKLIST */
+.check-section h3{font-size:14px;margin:14px 0 8px;padding-left:8px;border-left:3px solid var(--rose);font-weight:700;}
+.check-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:4px;}
+.ci{display:flex;align-items:flex-start;gap:12px;padding:11px 13px;border-bottom:1px solid var(--line);}
+.ci:last-child{border-bottom:none;}
+.cbox{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);flex:0 0 22px;display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;transition:all .2s;margin-top:1px;}
+.ci.done .cbox{background:var(--green);border-color:var(--green);color:#fff;}
+.ci.done .clabel{text-decoration:line-through;color:var(--muted);}
+.clabel{font-size:13.5px;line-height:1.4;}
+.csub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+/* BOTTOM NAV */
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;display:flex;background:rgba(255,250,248,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);height:var(--nav-h);padding-bottom:var(--safe-b);z-index:100;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:transparent;color:var(--muted);font-size:10px;font-family:inherit;transition:color .15s;}
+.nb .ni{font-size:21px;line-height:1;}
+.nb.active{color:var(--rose);}
+
+/* SAKURA REPORT */
+.sakura-bar{height:6px;border-radius:999px;background:linear-gradient(90deg,var(--sakura),var(--rose));margin:6px 0;}
+.date-row{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top-bar">
+    <h1>🌸 名古屋之旅 2026</h1>
+    <div class="info-row">
+      <div class="info-pill">3/16–3/21 <b>6日5夜</b></div>
+      <div class="info-pill">✈️ 到 <b>14:30 NGO</b></div>
+      <div class="info-pill">✈️ 走 <b>21:00 NGO</b></div>
+    </div>
+  </div>
+  <div id="day-bar"></div>
+  <div id="content">
+    <div class="screen visible" id="screen-itinerary">
+      <div id="tl-content"></div>
+    </div>
+    <div class="screen" id="screen-food">
+      <div id="food-content"></div>
+    </div>
+    <div class="screen" id="screen-check">
+      <div id="check-content"></div>
+    </div>
+    <div class="screen" id="screen-info">
+      <div id="info-content"></div>
+    </div>
+  </div>
+  <nav id="nav">
+    <button class="nb active" data-s="itinerary"><span class="ni">🗓</span>行程</button>
+    <button class="nb" data-s="food"><span class="ni">🍱</span>餐廳</button>
+    <button class="nb" data-s="check"><span class="ni">✅</span>備忘</button>
+    <button class="nb" data-s="info"><span class="ni">🏨</span>酒店</button>
+  </nav>
+</div>
+<script>
+/* ═══════════════════════════════════════
+   DATA
+═══════════════════════════════════════ */
+const MAP = {
+  h1:'https://www.google.com/maps/search/?api=1&query=Japan%2C%20460-0008%20Aichi%2C%20Nagoya%2C%20Naka%20Ward%2C%20Sakae%2C%204%20Chome-1-1%20%E4%B8%AD%E6%97%A5%E3%83%93%E3%83%AB%2024F',
+  h2:'https://www.google.com/maps/search/?api=1&query=18-10%20Tsubakicho%2C%20Nakamura%20Ward%2C%20Nagoya%2C%20Aichi%20453-0015',
+  airport:'https://www.google.com/maps/search/?api=1&query=Chubu+Centrair+International+Airport',
+  kiyosu:'https://www.google.com/maps/search/?api=1&query=Kiyosu+Castle+Japan',
+  gojo:'https://www.google.com/maps/search/?api=1&query=Gojo+River+Iwakura+Sakura',
+  workman:'https://www.google.com/maps/search/?api=1&query=WORKMAN+Plus+%E4%B8%AD%E5%B7%9D%E6%BE%84%E6%B1%A0%E5%BA%97+Nagoya',
+  outlet:'https://www.google.com/maps/search/?api=1&query=Mitsui+Outlet+Park+Jazz+Dream+Nagashima',
+  nabana:'https://www.google.com/maps/search/?api=1&query=Nabana+no+Sato+Illumination',
+  onyasai:'https://www.google.com/maps/search/?api=1&query=%E6%B8%A9%E9%87%8E%E8%8F%9C+%E5%90%8D%E5%8F%A4%E5%B1%8B%E6%A0%84%E5%BA%97',
+  tsubame:'https://www.google.com/maps/search/?api=1&query=Tsubame+Bread+Milk+Nagoya+Meieki',
+  ghibli:'https://www.google.com/maps/search/?api=1&query=Ghibli+Park+Aichi+Earth+Expo+Memorial+Park',
+  skystreet:'https://www.google.com/maps/search/?api=1&query=JR+Gate+Tower+15F+Sky+Street+Nagoya',
+  kanigin:'https://www.google.com/maps/search/?api=1&query=Kanigin+Meieki+Nagoya',
+  karasu:'https://www.google.com/maps/search/?api=1&query=%E7%8F%88%E7%90%B2%E5%87%A6%E3%82%AB%E3%83%A9%E3%82%B9+Nagoya+Fushimi',
+  nagoyacastle:'https://www.google.com/maps/search/?api=1&query=Nagoya+Castle',
+  bakuro:'https://www.google.com/maps/search/?api=1&query=%E9%A6%AC%E5%96%B0%E4%B8%80%E4%BB%A3+%E5%90%8D%E5%8F%A4%E5%B1%8B%E6%A0%84%E5%BA%97',
+  harbs:'https://www.google.com/maps/search/?api=1&query=HARBS+Sakae+Nagoya',
+  tsuruma:'https://www.google.com/maps/search/?api=1&query=Tsuruma+Park+Nagoya',
+  daikan:'https://www.google.com/maps/search/?api=1&query=%E5%A4%A7%E5%AF%92%E6%A1%9C+%E5%90%8D%E5%8F%A4%E5%B1%8B',
+  todagawa:'https://www.google.com/maps/search/?api=1&query=Todagawa+Green+Space+Nagoya',
+  osu:'https://www.google.com/maps/search/?api=1&query=Osu+Shopping+Street+Nagoya',
+  higashisushi:'https://www.google.com/maps/search/?api=1&query=%E6%9D%B1%E5%AF%BF%E5%8F%B8%E7%B8%BD%E5%BA%97+%E6%A0%84%E5%9C%B0%E4%B8%8B%E5%BA%97',
+  tokoname:'https://www.google.com/maps/search/?api=1&query=Tokoname+Pottery+Footpath',
+  aeon:'https://www.google.com/maps/search/?api=1&query=AEON+Mall+Tokoname',
+  yamazaki:'https://www.google.com/maps/search/?api=1&query=Yamazaki+River+Four+Seasons+Road+Nagoya',
+};
+function mb(url,label){return `<a href="${url}" target="_blank"><button class="map-btn"><span>📍</span>${label||'Google Maps'}</button></a>`;}
+
+const days=[
+{id:'d1',label:'3/16',wk:'一',title:'抵達日',sub:'榮區入住，自由晚餐',
+items:[
+{time:'14:30\n–15:30',title:'✈️ 抵達中部國際機場',desc:'入境、取行李、確認交通卡與電話網絡。',
+ detail:['搭名鐵特急至名古屋站約 28 分鐘','再轉地鐵至榮站','建議先買交通 IC 卡'],map:MAP.airport,mapLabel:'中部國際機場'},
+{time:'15:30\n–16:30',title:'🏨 前往榮區酒店入住',desc:'3/16–18 住所：榮 4 丁目 1-1 中日ビル 24F。',
+ detail:['地鐵榮站出口直達','先放行李，換舒適鞋'],map:MAP.h1,mapLabel:'榮區酒店'},
+{time:'16:30\n–18:30',title:'榮區散步休整',desc:'地下街、便利店、藥妝店隨意逛，調整時差優先。',badges:['b-free']},
+{time:'18:30\n–20:00',title:'🍽 晚餐：自由安排',desc:'不固定，視抵達後體力隨意選榮區餐廳。',badges:['b-food']},
+{time:'20:00 後',title:'返回酒店',desc:'早睡，準備翌日自駕長距離日程。'},
+]},
+
+{id:'d2',label:'3/17',wk:'二',title:'自駕日',sub:'清洲城→WORKMAN→Outlet→燈海→溫野菜',
+items:[
+{time:'08:00\n–08:45',title:'飯店早餐',desc:'整理物品，準備取車。'},
+{time:'09:00\n–09:30',title:'🚗 取車出發',desc:'確認 ETC、導航、停車與還車細節。',badges:['b-car'],
+ detail:['Toyota Alphard 7 座','租期 3/17–3/18（還車前）','確認 ETC 卡已啟用']},
+{time:'09:30\n–10:10',title:'前往清洲城',desc:'自駕約 30 分鐘，榮區 → 清洲城。',badges:['b-car'],map:MAP.kiyosu,mapLabel:'清洲城'},
+{time:'10:10\n–12:00',title:'🏯 清洲城＋五條川散步',desc:'古城與河畔初綻櫻花，視花況彈性停留。',badges:['b-sakura'],
+ detail:['五條川兩岸約 1,400 棵吉野櫻','沿河散步路線約 3–4 公里','部分路段有出租單車'],map:MAP.gojo,mapLabel:'五條川'},
+{time:'12:00\n–13:00',title:'🍽 午餐：清須／岩倉自由選',desc:'不固定，避免為吃飯繞路。',badges:['b-food']},
+{time:'13:00\n–14:30',title:'🛍 WORKMAN Plus 中川澄池店',desc:'日常服、戶外裝備、機能工作服。預算友善，性價比高。',badges:['b-shop'],
+ detail:['由清洲自駕約 20 分鐘','無指定高速，按 Google Maps 走最快','可買：FieldCore 功能外套、FIND-OUT 輕量褲','店舖面積大，選擇多'],map:MAP.workman,mapLabel:'WORKMAN Plus 中川澄池店'},
+{time:'14:30\n–17:30',title:'🛍 三井 Outlet 爵士之夢長島',desc:'集中購物，提早處理大件採買。',badges:['b-shop'],
+ detail:['Apple、化妝品、Nike、Adidas','食品禮盒採買可在此完成','免費停車場大'],map:MAP.outlet,mapLabel:'Jazz Dream 長島 Outlet'},
+{time:'17:30\n–18:00',title:'前往名花之里',desc:'Outlet 直接接燈海，動線最順。',badges:['b-car'],map:MAP.nabana,mapLabel:'名花之里'},
+{time:'18:00\n–20:00',title:'🌃 名花之里燈海',desc:'光之隧道、光之大河、富士島觀景台。',
+ detail:['入場費約 ¥2,500','建議 18:00 前入場看點燈瞬間','停車場於展場附近，收費較低'],map:MAP.nabana,mapLabel:'名花之里'},
+{time:'20:30\n–21:30',title:'返回榮區酒店',desc:'由長島自駕回榮，約 40–50 分鐘。',badges:['b-car']},
+{time:'21:30\n–23:00',title:'🍲 晚餐：溫野菜 名古屋榮店',desc:'涮涮鍋吃到飽，榮站 1 號出口附近。',badges:['b-food'],
+ detail:['營業至 00:00，適合這天晚歸後吃','推薦：黑毛和牛＋蔬菜鍋套餐','預算 ¥2,800–4,500 / 人'],map:MAP.onyasai,mapLabel:'溫野菜 名古屋榮店'},
+]},
+
+{id:'d3',label:'3/18',wk:'三',title:'吉卜力日',sub:'Tsubame→吉卜力→換酒店→Sky Street→蟹銀',
+items:[
+{time:'07:30\n–08:00',title:'🏨 退房＋前往名古屋站',desc:'今天由榮區換到名站酒店，行李先存放或帶上車。',badges:['b-hotel']},
+{time:'08:00\n–09:00',title:'🍞 早餐：Tsubame Bread & Milk 名駅店',desc:'厚吐司＋飲料，補足整天體力。',badges:['b-food'],
+ detail:['名站步行 4–6 分鐘','招牌：奶油厚吐司、小倉吐司','每天 08:00 開始'],map:MAP.tsubame,mapLabel:'Tsubame 名駅店'},
+{time:'09:00\n–09:45',title:'🚗 前往吉卜力公園',desc:'由名站開車到愛・地球博紀念公園，約 40 分鐘。',badges:['b-car'],map:MAP.ghibli,mapLabel:'吉卜力公園'},
+{time:'10:00\n–17:00',title:'🏯 吉卜力公園整日',desc:'大散步券，5 大園區，建議預先訂購入場票。',badges:['b-free'],
+ detail:['大倉庫：千與千尋、龍貓客棧（必去）','魔女之谷：霍爾移動城堡、魔法商店（必去）','青春之丘：天空之城瞭望塔','怪物之鄉、Dondoko 之森','最後入場 16:30，17:00 關園','⚠️ 3/17（週二）為本公園休園日，已安排在 3/18'],map:MAP.ghibli,mapLabel:'吉卜力公園'},
+{time:'17:00\n–18:00',title:'🏨 回名站＋入住新酒店',desc:'3/18–21 住所：椿町 18-10，名古屋站步行約 5 分鐘。',badges:['b-hotel'],
+ detail:['還車亦可在此時段處理'],map:MAP.h2,mapLabel:'名站酒店'},
+{time:'18:30\n–19:30',title:'🌃 JR Gate Tower 15F Sky Street',desc:'名站上蓋免費展望廊，取代 Sky Promenade。',
+ detail:['免費入場，從名站直達無需另買票','可看到名古屋站周邊全景','夜間開放大約至 23:00','比 Sky Promenade 更貼近今晚餐廳動線'],map:MAP.skystreet,mapLabel:'JR Gate Tower 15F'},
+{time:'19:30\n–21:30',title:'🦀 晚餐：名古屋蟹銀名駅店',desc:'螃蟹吃到飽，距名古屋站步行約 1 分鐘。',badges:['b-food'],
+ detail:['帝王蟹、松葉蟹、壽司吃到飽','需提前預約，旺季至少提早 1 周','每位約 ¥5,500 起','營業至 23:00'],map:MAP.kanigin,mapLabel:'名古屋蟹銀名駅店'},
+]},
+
+{id:'d4',label:'3/19',wk:'四',title:'市區賞櫻日',sub:'Karasu→名古屋城→馬喰一代→Harbs→鶴舞公園',
+items:[
+{time:'08:00\n–09:00',title:'☕ 早餐：Karasu 珈琲処',desc:'名古屋式小倉紅豆吐司，孤獨的美食家取景店。',badges:['b-food'],
+ detail:['伏見站步行約 5 分鐘','08:00 開門','小倉吐司＋黑咖啡，約 ¥800–1,000','昭和復古咖啡廳氣氛'],map:MAP.karasu,mapLabel:'Karasu 珈琲処'},
+{time:'09:15\n–11:45',title:'🏯 名古屋城＋本丸御殿',desc:'預測開花日（3/17–18）後第一天，預期初開至一成花。',badges:['b-sakura'],
+ detail:['開放時間：09:00–16:30','⚠️ 3/20–4/5 特別延長至 19:30（名古屋城春日祭）','門票 ¥900','本丸御殿金箔天井必看','1,000 棵吉野櫻'],map:MAP.nagoyacastle,mapLabel:'名古屋城'},
+{time:'12:15\n–13:45',title:'🥩 午餐：馬喰一代 榮店',desc:'飛驒牛燒肉／壽喜燒，午市 11:30–15:00。',badges:['b-food'],
+ detail:['從名古屋城搭地鐵回榮最順','預算 ¥3,500–5,000 / 人','建議提前訂位'],map:MAP.bakuro,mapLabel:'馬喰一代 榮店'},
+{time:'14:00\n–15:00',title:'🍰 下午茶：Harbs 榮區',desc:'水果千層蛋糕，午後休息點。',badges:['b-food'],
+ detail:['榮站步行 3–5 分鐘','水果千層 ¥1,100 起','11:00–20:00'],map:MAP.harbs,mapLabel:'HARBS 榮'},
+{time:'15:30\n–17:30',title:'🌸 鶴舞公園',desc:'1,200 棵吉野櫻，預測此時仍在初開至二成期，有花可看。',badges:['b-sakura'],
+ detail:['鶴舞公園桜まつり 2026：3/20–4/12','⚠️ 3/19 尚未開始祭典，但已有花景','夜間亮燈由 3/20 起 18:00–22:00',
+         '若花況未如理想 → 見備案'],map:MAP.tsuruma,mapLabel:'鶴舞公園'},
+{time:'17:30',title:'🌸 備案：大寒櫻花道',desc:'若鶴舞公園花況不理想，改去大寒櫻花道，通常 3 月中旬前後已進入佳期。',badges:['b-alt'],
+ detail:['大寒櫻：比染井吉野早 1–2 週開花','3/19 有可能已在盛開狀態','動線：地鐵至名城線各站，視位置調整'],map:MAP.daikan,mapLabel:'大寒櫻花道'},
+{time:'18:30\n–20:00',title:'🍽 晚餐：榮區自由選',desc:'保留給當晚最新社群熱門店，即場決定。',badges:['b-food']},
+]},
+
+{id:'d5',label:'3/20',wk:'五',title:'戶田川＋大須日',sub:'空中單車賞櫻→大須→地道大眾壽司',
+items:[
+{time:'08:00\n–08:30',title:'早餐／便利店簡餐',desc:'盡量早出發，避免空中單車排太久。'},
+{time:'08:30\n–09:20',title:'前往戶田川綠地公園',desc:'地鐵東山線至高畑站，轉市巴士高畑 14 系統。',badges:['b-car'],
+ detail:['高畑站→八百島站→步行約 9 分鐘','全程約 50 分鐘'],map:MAP.todagawa,mapLabel:'戶田川綠地公園'},
+{time:'09:30\n–12:00',title:'🚲 戶田川綠地公園',desc:'約 1,000 棵吉野櫻，空中腳踏車懸掛賞花。',badges:['b-sakura'],
+ detail:['空中單車 ¥100 / 人，約 5 分鐘一圈','先到先排，旺季可達 1–2 小時隊伍','建議到達後第一件事先去排隊',
+         '花期偏後：3/20 有機會看到更完整花景'],map:MAP.todagawa,mapLabel:'戶田川綠地公園'},
+{time:'12:00\n–13:00',title:'🍽 午餐：回程途中自由選',desc:'維持彈性即可。',badges:['b-food']},
+{time:'13:00\n–14:00',title:'返回市區',desc:'回榮或直接去大須。'},
+{time:'14:30\n–17:30',title:'🛍 大須商店街',desc:'街區散步、小吃、雜貨與潮流採買。',badges:['b-shop'],
+ detail:['大須外郎糕、大須饅頭採買','動漫、古著、雜貨、電器','章魚燒、雞翅等小吃現場選'],map:MAP.osu,mapLabel:'大須商店街'},
+{time:'18:00\n–19:30',title:'🍣 晚餐：東壽司總店 榮地下店',desc:'榮地下街老字號，地道大眾壽司。',badges:['b-food'],
+ detail:['榮地下街內','傳統握壽司，預算 ¥2,000–3,500','18:00 前到較穩陣，19:00 後可能等位','名古屋旅遊官方網站有介紹'],map:MAP.higashisushi,mapLabel:'東壽司總店 榮地下店'},
+]},
+
+{id:'d6',label:'3/21',wk:'六',title:'回程日',sub:'常滑觀光→AEON→機場',
+items:[
+{time:'08:00\n–09:00',title:'🏨 早餐＋退房',desc:'整理行李，確認護照與購物戰利品包裝。',badges:['b-hotel']},
+{time:'09:00\n–10:00',title:'前往常滑市',desc:'由名站出發，最後一天直接走機場方向，不再折返市區。',
+ detail:['名鐵常滑線從名古屋站直達常滑站','約 30 分鐘，無需轉車'],map:MAP.tokoname,mapLabel:'常滑市'},
+{time:'10:00\n–11:30',title:'⛩ 常滑陶瓷散步道',desc:'昭和陶業遺址、常喵招財貓、老街陶藝小店。',
+ detail:['24 小時開放免費入場','A 路線約 1.6km、60–90 分鐘','常喵：寬 6.3m × 高 3.8m 巨型招財貓','可在小店採買陶瓷伴手禮（易碎品先用衣服包好）'],map:MAP.tokoname,mapLabel:'常滑陶瓷散步道'},
+{time:'11:45\n–15:30',title:'🛒 AEON Mall 常滑',desc:'午餐＋最後購物，超市、藥妝、伴手禮一次完成。',badges:['b-shop'],
+ detail:['商店 10:00–21:00','餐廳 11:00–22:00','超市 9:00–22:00','距機場約 15 分鐘車程'],map:MAP.aeon,mapLabel:'AEON Mall 常滑'},
+{time:'15:30\n–16:30',title:'🚗 由常滑前往機場',desc:'常滑與機場極近，預留時間整理行李及寄艙。',
+ map:MAP.airport,mapLabel:'中部國際機場'},
+{time:'17:00\n–18:30',title:'⚠️ 機場報到＋安檢',desc:'建議最遲 18:30 前完成報到，對 21:00 航班最穩妥。',badges:['b-warn'],
+ detail:['⚠️ 國際線報到截止：起飛前 90 分鐘','退稅文件整理，消費滿 ¥5,000 可退稅','行李：易碎品申報，免稅店最後採購']},
+{time:'21:00',title:'✈️ 航班起飛',desc:'返回香港。',map:MAP.airport,mapLabel:'中部國際機場'},
+]},
+];
+
+const restaurants=[
+{icon:'🍲',bg:'#fff5e6',day:'3/17',meal:'晚餐',name:'溫野菜 名古屋榮店',sub:'榮站 1 號出口附近，營業至 00:00',
+ tags:['涮涮鍋吃到飽','¥2,800–4,500/人'],note:'黑毛和牛＋蔬菜套餐，適合自駕日晚歸後吃。',map:MAP.onyasai},
+{icon:'🍞',bg:'#fff8e6',day:'3/18',meal:'早餐',name:'Tsubame Bread & Milk 名駅店',sub:'名古屋站步行 4–6 分鐘，08:00 開始',
+ tags:['厚吐司','小倉吐司','天然酵母'],note:'奶油厚吐司、小倉吐司為主，¥600–1,000。補足整天吉卜力體力。',map:MAP.tsubame},
+{icon:'🦀',bg:'#fff0f0',day:'3/18',meal:'晚餐',name:'名古屋蟹銀名駅店',sub:'名古屋站步行約 1 分鐘，至 23:00',
+ tags:['螃蟹吃到飽','⚠️ 需預約','¥5,500+/人'],note:'帝王蟹＋松葉蟹＋壽司吃到飽。旺季建議提前 1 周預約。',map:MAP.kanigin},
+{icon:'☕',bg:'#f7f0e6',day:'3/19',meal:'早餐',name:'Karasu 珈琲処',sub:'伏見站步行約 5 分鐘，08:00 開門',
+ tags:['小倉吐司','昭和咖啡廳','孤獨的美食家'],note:'名古屋式小倉紅豆吐司＋黑咖啡，¥800–1,000。',map:MAP.karasu},
+{icon:'🥩',bg:'#fff0e6',day:'3/19',meal:'午餐',name:'馬喰一代 榮店',sub:'午市 11:30–15:00',
+ tags:['飛驒牛','燒肉/壽喜燒','⚠️ 建議訂位'],note:'¥3,500–5,000 / 人，飛驒牛整頭買付旗艦店。',map:MAP.bakuro},
+{icon:'🍰',bg:'#fff0f4',day:'3/19',meal:'下午茶',name:'Harbs 榮區',sub:'榮站步行 3–5 分鐘，11:00–20:00',
+ tags:['水果千層 ¥1,100+','外帶可選'],note:'午餐後稍作休息，再接下午賞花。',map:MAP.harbs},
+{icon:'🍣',bg:'#f0f7ff',day:'3/20',meal:'晚餐',name:'東壽司總店 榮地下店',sub:'榮地下街，至 21:00',
+ tags:['老字號','地道大眾','¥2,000–3,500'],note:'名古屋旅遊官方推薦的傳統握壽司店，建議 18:00 前到。',map:MAP.higashisushi},
+];
+
+const checks={
+'行前預訂':[
+{l:'吉卜力公園門票（大散步券）',s:'⚠️ 超搶手，發售日當天要守候 Klook'},
+{l:'馬喰一代 榮店 預約',s:'午市 11:30，建議電話或官網提前訂位'},
+{l:'名古屋蟹銀名駅店 預約',s:'旺季提前 1 周，人數確認後再預約'},
+{l:'Toyota Alphard 租車',s:'確認 3/17–3/18 租期、ETC 卡、保險'},
+{l:'3/16–18 榮區酒店確認',s:'中日ビル 24F，check-in 時間與行李存放'},
+{l:'3/18–21 名站酒店確認',s:'椿町 18-10，預計 3/18 傍晚入住'},
+],
+'行程提醒':[
+{l:'3/17（週二）為吉卜力公園休園日',s:'✅ 已調整至 3/18（週三）'},
+{l:'登河那古野本店每週三定休',s:'✅ 已移除，3/18 晚餐改排蟹銀'},
+{l:'名古屋城 3/19 開放至 16:30',s:'⚠️ 3/20 起延長至 19:30（春日祭）'},
+{l:'鶴舞公園桜まつり 由 3/20 起',s:'3/19 去無祭典，花景視花況而定'},
+{l:'Sky Promenade 已放棄',s:'✅ 改為 JR Gate Tower 15F Sky Street（免費）'},
+{l:'3/21 不折返市區',s:'✅ 常滑→AEON→機場直線動線'},
+{l:'18:30 前完成機場報到',s:'⚠️ 3/21 起飛 21:00，請留意'},
+{l:'戶田川旺季排隊',s:'3/20 建議 09:30 前到達排空中單車'},
+],
+'機場當日':[
+{l:'護照與登機証',s:''},
+{l:'行李尺寸與重量符合規定',s:''},
+{l:'易碎陶瓷品妥善包裝',s:'常滑採購品'},
+{l:'退稅文件整理',s:'消費滿 ¥5,000 可辦退稅'},
+{l:'剩餘日幣處理',s:''},
+]};
+
+/* ═══════════════════════════════════════
+   RENDER
+═══════════════════════════════════════ */
+let curDay='d1', curScr='itinerary';
+
+function renderDayBar(){
+  const bar=document.getElementById('day-bar');
+  bar.innerHTML=days.map(d=>`<button class="day-tab${d.id===curDay?' active':''}" data-day="${d.id}">${d.label}<br><span style="font-size:10px;font-weight:400">${d.wk}</span></button>`).join('');
+  bar.querySelectorAll('.day-tab').forEach(b=>b.addEventListener('click',()=>{curDay=b.dataset.day;renderDayBar();renderTimeline();}));
+}
+
+function renderTimeline(){
+  const d=days.find(x=>x.id===curDay);
+  let h=`<div class="notice"><b>${d.label}（${d.wk}）${d.title}</b> — ${d.sub}</div>`;
+  d.items.forEach((item,i)=>{
+    const hasDet=item.detail&&item.detail.length>0;
+    const hasMap=item.map;
+    const exp=hasDet||hasMap;
+    let bRow='';
+    if(item.badges)bRow=`<div class="badge-row">${item.badges.map(b=>`<span class="badge ${b}">${{b_food:'🍽 餐飲',b_sakura:'🌸 賞櫻',b_car:'🚗 自駕',b_free:'🎟 景點',b_warn:'⚠️ 留意',b_alt:'🔄 備案',b_shop:'🛍 購物',b_hotel:'🏨 酒店'}[b]||b}</span>`).join('')}</div>`;
+    h+=`<div class="tl-card${exp?' has-detail':''}">
+<div class="tl-head">
+<div class="tl-time">${item.time}</div>
+<div class="tl-body"><b>${item.title}</b><p>${item.desc}</p>${bRow}</div>
+<div class="tl-toggle">${exp?'›':''}</div>
+</div>`;
+    if(exp){
+      let det='';
+      if(item.detail)det=`<ul>${item.detail.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+      if(item.map)det+=mb(item.map,item.mapLabel);
+      h+=`<div class="tl-detail">${det}</div>`;
+    }
+    h+=`</div>`;
+  });
+  document.getElementById('tl-content').innerHTML=h;
+  document.querySelectorAll('.tl-card.has-detail .tl-head').forEach(hd=>hd.addEventListener('click',()=>hd.closest('.tl-card').classList.toggle('open')));
+  document.getElementById('content').scrollTop=0;
+}
+
+function renderFood(){
+  let h=`<div class="sec-title">已預定餐廳 · 按日期排列</div>`;
+  restaurants.forEach(r=>{
+    h+=`<div class="rest-card">
+<div class="rest-head"><div class="rest-icon" style="background:${r.bg}">${r.icon}</div>
+<div class="rest-info"><h3>${r.name}</h3><p>${r.day} ${r.meal} · ${r.sub}</p></div></div>
+<div class="rest-tags">${r.tags.map(t=>`<span class="rest-tag">${t}</span>`).join('')}</div>
+<div class="rest-note">${r.note}<br>${mb(r.map,'查看位置')}</div>
+</div>`;
+  });
+  document.getElementById('food-content').innerHTML=h;
+}
+
+function renderCheck(){
+  const saved=JSON.parse(localStorage.getItem('nc26')||'{}');
+  let h='';
+  for(const[sec,items]of Object.entries(checks)){
+    h+=`<div class="check-section"><h3>${sec}</h3><div class="check-wrap">`;
+    items.forEach((it,i)=>{
+      const k=sec+'_'+i;const done=saved[k]||false;
+      h+=`<div class="ci${done?' done':''}" data-k="${k}"><div class="cbox">${done?'✓':''}</div><div><div class="clabel">${it.l}</div>${it.s?`<div class="csub">${it.s}</div>`:''}</div></div>`;
+    });
+    h+=`</div></div>`;
+  }
+  document.getElementById('check-content').innerHTML=h;
+  document.querySelectorAll('.ci').forEach(ci=>ci.addEventListener('click',()=>{
+    const k=ci.dataset.k;const d=ci.classList.toggle('done');
+    ci.querySelector('.cbox').textContent=d?'✓':'';
+    const s=JSON.parse(localStorage.getItem('nc26')||'{}');s[k]=d;localStorage.setItem('nc26',JSON.stringify(s));
+  }));
+}
+
+function renderInfo(){
+  const h=`
+<div class="sec-title">住宿資訊</div>
+<div class="hotel-card"><div class="hotel-head"><div class="hotel-icon">🏨</div>
+<div class="hotel-info"><h3>榮區酒店</h3><p>3/16（一）– 3/18（三）2晚</p></div></div>
+<div class="hotel-addr">〒460-0008 愛知縣名古屋市中區榮 4 丁目 1-1<br>中日ビル 24F<br>${mb(MAP.h1,'在 Google Maps 開啟')}</div></div>
+<div class="hotel-card"><div class="hotel-head"><div class="hotel-icon">🏨</div>
+<div class="hotel-info"><h3>名古屋站酒店</h3><p>3/18（三）– 3/21（六）3晚</p></div></div>
+<div class="hotel-addr">〒453-0015 愛知縣名古屋市中村區椿町 18-10<br>名古屋站步行約 5 分鐘<br>${mb(MAP.h2,'在 Google Maps 開啟')}</div></div>
+<div class="sec-title">最新花期預測（截至 3 月上旬）</div>
+<div class="notice blue">
+<b>名古屋染井吉野</b><br>
+開花日：約 3/17–3/18 ｜ 滿開日：約 3/28–3/30<br><br>
+<div class="sakura-bar"></div>
+<div class="date-row"><span>3/16</span><span>3/19</span><span>3/22</span><span>3/25</span><span>3/28</span></div>
+<br>
+🌸 你旅程期間（3/16–3/21）大致處於「剛開花→二成花」階段<br>
+最佳賞花窗為 3/28 以後，但 3/19–3/21 市區已有明顯花景
+</div>
+<div class="notice green"><b>各景點花況預測</b><br>
+・清洲城／五條川（3/17）：初綻期，花況視天氣<br>
+・名古屋城（3/19）：初開至一成花，春日祭未開始<br>
+・鶴舞公園（3/19）：初開，祭典由 3/20 起正式開始<br>
+・戶田川綠地（3/20）：花期偏後，可能是行程最佳花景日<br>
+・備案：大寒櫻（比染井吉野早開）3/19 可能已近盛開</div>
+<div class="sec-title">備案地圖</div>
+<div class="tl-card has-detail"><div class="tl-head"><div class="tl-time" style="font-size:11px">鶴舞<br>備案</div>
+<div class="tl-body"><b>🌸 大寒櫻花道（備案）</b><p>若 3/19 鶴舞花況不理想，改去大寒櫻花道，染色較早。</p></div>
+<div class="tl-toggle">›</div></div>
+<div class="tl-detail"><ul><li>大寒櫻比染井吉野提早 1–2 週開花</li><li>3/19 有機會已近盛開</li><li>動線：地鐵名城線方向前往</li></ul>
+${mb(MAP.daikan,'大寒櫻花道')}</div></div>
+<div class="tl-card has-detail"><div class="tl-head"><div class="tl-time" style="font-size:11px">後段<br>備案</div>
+<div class="tl-body"><b>🌸 山崎川四季之道（後段備案）</b><p>3/20–3/21 花況若提早，可加入行程。</p></div>
+<div class="tl-toggle">›</div></div>
+<div class="tl-detail"><ul><li>名古屋代表級賞花散步道，約 4km</li><li>最佳期：3 月下旬至 4 月上旬</li><li>3/20–21 若花況比預測早，可作替換或追加</li></ul>
+${mb(MAP.yamazaki,'山崎川四季之道')}</div></div>`;
+  document.getElementById('info-content').innerHTML=h;
+  document.querySelectorAll('.tl-card.has-detail .tl-head').forEach(hd=>hd.addEventListener('click',()=>hd.closest('.tl-card').classList.toggle('open')));
+}
+
+function showScr(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  document.getElementById('screen-'+name).classList.add('visible');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.nb[data-s="${name}"]`).classList.add('active');
+  document.getElementById('day-bar').style.display=name==='itinerary'?'flex':'none';
+  curScr=name;
+  if(name==='food')renderFood();
+  if(name==='check')renderCheck();
+  if(name==='info')renderInfo();
+  document.getElementById('content').scrollTop=0;
+}
+document.querySelectorAll('.nb').forEach(b=>b.addEventListener('click',()=>showScr(b.dataset.s)));
+
+renderDayBar();
+renderTimeline();
+</script>
+</body>
+</html>
